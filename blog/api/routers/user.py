@@ -30,5 +30,5 @@ async def login(user: SimpleUser, db: Session = Depends(connection_to_db)):
         if user.password == user.password:
             return Result(data={
                 "token": token_util.create_access_token(data={"user_name": user.user_name, "password": user.password})})
-        return Result.error("密码错误")
-    return Result.error("不存在的用户")
+        return Result(code=500, msg="密码错误")
+    return Result(code=500, msg="不存在的用户")

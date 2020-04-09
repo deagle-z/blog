@@ -1,13 +1,17 @@
 from time import time
 
+from fastapi.exceptions import RequestValidationError, HTTPException
+from fastapi.security import OAuth2PasswordBearer
 import uvicorn
+import logging
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 from blog.api.api import router
-from fastapi.security import OAuth2PasswordBearer
 from fastapi import Request
 
+from blog.core.exception.exceptions import BusinessException
 from blog.core.middlewares.middle_ware import token_middle
+from blog.core.response import Result
 
 
 def get_application() -> FastAPI:
@@ -21,10 +25,19 @@ def get_application() -> FastAPI:
     )
 
     application.include_router(router)
+    # application.add_exception_handler()
     return application
 
 
 app = get_application()
+
+
+@app.exception_handler(HTTPException)
+async def business_exception_handler(request, exc):
+    if type(exc) is HTTPException:
+        return Result(code=exc.code, msg=exc.msg)
+    # else:
+    #     return Result(code=500, msg="未知异常")
 
 
 @app.middleware("http")
